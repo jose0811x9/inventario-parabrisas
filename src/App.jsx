@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import AgregarVidrio from './AgregarVidrio'
 import Espacios from './Espacios'
+import EditarVidrio from './EditarVidrio'
 import Login from './Login'
 import './App.css'
 
@@ -17,6 +18,7 @@ function App() {
   const [filtroTipo, setFiltroTipo] = useState('todos')
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [vidrioEditando, setVidrioEditando] = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSesion(data.session))
@@ -69,6 +71,16 @@ function App() {
     await supabase.auth.signOut()
   }
 
+  async function eliminarVidrio(v) {
+    if (!confirm(`¿Eliminar el vidrio ${v.codigo_unico}?`)) return
+    const { error } = await supabase.from('vidrios').delete().eq('id', v.id)
+    if (error) {
+      alert('No se pudo eliminar: ' + error.message)
+    } else {
+      cargarDatos()
+    }
+  }
+
   const vidriosFiltrados = vidrios.filter((v) => {
     const coincideTipo = filtroTipo === 'todos' || v.tipo === filtroTipo
     const texto = busqueda.toLowerCase()
@@ -109,7 +121,7 @@ function App() {
           <button className={`tab ${vista === 'agregar' ? 'tab-activo' : ''}`} onClick={() => setVista('agregar')}>
             Agregar vidrio
           </button>
-                    <button className={`tab ${vista === 'espacios' ? 'tab-activo' : ''}`} onClick={() => setVista('espacios')}>
+          <button className={`tab ${vista === 'espacios' ? 'tab-activo' : ''}`} onClick={() => setVista('espacios')}>
             Espacios
           </button>
         </nav>
@@ -152,7 +164,7 @@ function App() {
                   <thead>
                     <tr>
                       <th>Código</th><th>Tipo</th><th>Posición</th><th>Vehículo</th>
-                      <th>Marca / Modelo</th><th>Cantidad</th><th>Espacio</th>
+                      <th>Marca / Modelo</th><th>Cantidad</th><th>Espacio</th><th></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -165,10 +177,14 @@ function App() {
                         <td>{v.marca} {v.modelo}</td>
                         <td className={v.cantidad === 0 ? 'cantidad-cero' : ''}>{v.cantidad}</td>
                         <td>{v.espacios?.codigo_espacio || '—'}</td>
+                        <td className="col-acciones">
+                          <button className="btn-icono" onClick={() => setVidrioEditando(v)}>Editar</button>
+                          <button className="btn-icono btn-eliminar" onClick={() => eliminarVidrio(v)}>Eliminar</button>
+                        </td>
                       </tr>
                     ))}
                     {vidriosFiltrados.length === 0 && (
-                      <tr><td colSpan="7" className="sin-resultados">No hay vidrios que coincidan con la búsqueda.</td></tr>
+                      <tr><td colSpan="8" className="sin-resultados">No hay vidrios que coincidan con la búsqueda.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -183,6 +199,7 @@ function App() {
             <AgregarVidrio espacios={espacios} onGuardado={cargarDatos} />
           </section>
         )}
+
         {vista === 'espacios' && (
           <section className="panel">
             <div className="panel-head"><h2>Espacios de bodega</h2></div>
@@ -190,6 +207,15 @@ function App() {
           </section>
         )}
       </main>
+
+      {vidrioEditando && (
+        <EditarVidrio
+          vidrio={vidrioEditando}
+          espacios={espacios}
+          onCerrar={() => setVidrioEditando(null)}
+          onGuardado={cargarDatos}
+        />
+      )}
     </div>
   )
 }

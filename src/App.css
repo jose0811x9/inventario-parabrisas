@@ -557,3 +557,29 @@ tbody tr:hover {
     padding: 8px 8px;
   }
 }
+.espacios-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-espacio {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.btn-icono {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-dim);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-eliminar:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}

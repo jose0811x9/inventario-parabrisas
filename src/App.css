@@ -583,3 +583,59 @@ tbody tr:hover {
   border-color: var(--danger);
   color: var(--danger);
 }
+.col-acciones {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 13, 17, 0.65);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+  animation: fadeUp 0.2s ease both;
+}
+
+.modal-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.modal-sub {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin: 0 0 18px;
+  text-transform: capitalize;
+}
+
+.btn-cerrar {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+

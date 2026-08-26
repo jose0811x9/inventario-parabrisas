@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import AgregarVidrio from './AgregarVidrio'
+import Espacios from './Espacios'
 import Login from './Login'
 import './App.css'
 
@@ -108,6 +109,9 @@ function App() {
           <button className={`tab ${vista === 'agregar' ? 'tab-activo' : ''}`} onClick={() => setVista('agregar')}>
             Agregar vidrio
           </button>
+                    <button className={`tab ${vista === 'espacios' ? 'tab-activo' : ''}`} onClick={() => setVista('espacios')}>
+            Espacios
+          </button>
         </nav>
       </header>
 
@@ -177,6 +181,12 @@ function App() {
           <section className="panel">
             <div className="panel-head"><h2>Agregar nuevo vidrio</h2></div>
             <AgregarVidrio espacios={espacios} onGuardado={cargarDatos} />
+          </section>
+        )}
+        {vista === 'espacios' && (
+          <section className="panel">
+            <div className="panel-head"><h2>Espacios de bodega</h2></div>
+            <Espacios espacios={espacios} vidrios={vidrios} onGuardado={cargarDatos} />
           </section>
         )}
       </main>

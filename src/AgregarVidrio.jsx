@@ -8,7 +8,7 @@ const PREFIJOS_VEHICULO = { auto: 'AUT', camion: 'CAM' }
 // Opciones de posición permitidas según el tipo de vidrio
 const POSICIONES_POR_TIPO = {
   parabrisas: ['delantero', 'posterior'],
-  ventana: ['delantero'],
+  ventana: ['delantero', 'posterior'],
   ventolera: ['delantero', 'posterior', 'ambos'],
   lateral: ['no_aplica'],
 }
@@ -40,7 +40,6 @@ export default function AgregarVidrio({ espacios, onGuardado }) {
   function actualizar(campo, valor) {
     setForm((prev) => {
       const nuevo = { ...prev, [campo]: valor }
-      // Si cambia el tipo, reseteamos posición a la primera válida y el espacio elegido
       if (campo === 'tipo') {
         nuevo.posicion = POSICIONES_POR_TIPO[valor][0]
         nuevo.lado = valor === 'parabrisas' ? 'no_aplica' : prev.lado === 'no_aplica' ? 'izquierdo' : prev.lado
@@ -77,29 +76,77 @@ export default function AgregarVidrio({ espacios, onGuardado }) {
     setGuardando(true)
     setMensaje(null)
 
-    const codigo_unico = await generarCodigo()
+    const ladoFinal = necesitaLado ? form.lado : 'no_aplica'
 
-    const { error } = await supabase.from('vidrios').insert({
-      codigo_unico,
-      tipo: form.tipo,
-      posicion: form.posicion,
-      lado: necesitaLado ? form.lado : 'no_aplica',
-      tipo_vehiculo: form.tipo_vehiculo,
-      marca: form.marca,
-      modelo: form.modelo,
-      cantidad: Number(form.cantidad),
-      precio: form.precio ? Number(form.precio) : null,
-      proveedor: form.proveedor || null,
-      espacio_id: Number(form.espacio_id),
-    })
+    // 1. ¿Ya existe este mismo vidrio (tipo, posición, lado, vehículo, marca, modelo) en ese espacio?
+    const { data: existentes, error: errorBusqueda } = await supabase
+      .from('vidrios')
+      .select('*')
+      .eq('tipo', form.tipo)
+      .eq('posicion', form.posicion)
+      .eq('lado', ladoFinal)
+      .eq('tipo_vehiculo', form.tipo_vehiculo)
+      .eq('espacio_id', Number(form.espacio_id))
+      .ilike('marca', form.marca.trim())
+      .ilike('modelo', form.modelo.trim())
+      .limit(1)
 
-    if (error) {
-      setMensaje({ tipo: 'error', texto: 'No se pudo guardar. ' + error.message })
-    } else {
-      setMensaje({ tipo: 'exito', texto: `Vidrio guardado con código ${codigo_unico}` })
-      setForm((prev) => ({ ...prev, marca: '', modelo: '', cantidad: 1, precio: '', proveedor: '' }))
-      onGuardado()
+    if (errorBusqueda) {
+      setMensaje({ tipo: 'error', texto: 'No se pudo verificar el inventario: ' + errorBusqueda.message })
+      setGuardando(false)
+      return
     }
+
+    if (existentes && existentes.length > 0) {
+      // 2a. Ya existe en ese espacio: solo sumamos la cantidad
+      const actual = existentes[0]
+      const { error } = await supabase
+        .from('vidrios')
+        .update({
+          cantidad: actual.cantidad + Number(form.cantidad),
+          precio: form.precio ? Number(form.precio) : actual.precio,
+          proveedor: form.proveedor || actual.proveedor,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', actual.id)
+
+      if (error) {
+        setMensaje({ tipo: 'error', texto: 'No se pudo actualizar: ' + error.message })
+      } else {
+        setMensaje({
+          tipo: 'exito',
+          texto: `Ya existía este vidrio en ese espacio (${actual.codigo_unico}). Se sumaron ${form.cantidad} unidades, ahora hay ${actual.cantidad + Number(form.cantidad)}.`,
+        })
+        setForm((prev) => ({ ...prev, marca: '', modelo: '', cantidad: 1, precio: '', proveedor: '' }))
+        onGuardado()
+      }
+    } else {
+      // 2b. No existe en ese espacio: creamos uno nuevo con su propio código
+      const codigo_unico = await generarCodigo()
+
+      const { error } = await supabase.from('vidrios').insert({
+        codigo_unico,
+        tipo: form.tipo,
+        posicion: form.posicion,
+        lado: ladoFinal,
+        tipo_vehiculo: form.tipo_vehiculo,
+        marca: form.marca,
+        modelo: form.modelo,
+        cantidad: Number(form.cantidad),
+        precio: form.precio ? Number(form.precio) : null,
+        proveedor: form.proveedor || null,
+        espacio_id: Number(form.espacio_id),
+      })
+
+      if (error) {
+        setMensaje({ tipo: 'error', texto: 'No se pudo guardar. ' + error.message })
+      } else {
+        setMensaje({ tipo: 'exito', texto: `Vidrio guardado con código ${codigo_unico}` })
+        setForm((prev) => ({ ...prev, marca: '', modelo: '', cantidad: 1, precio: '', proveedor: '' }))
+        onGuardado()
+      }
+    }
+
     setGuardando(false)
   }
 

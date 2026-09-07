@@ -164,7 +164,7 @@ function App() {
                   <thead>
                     <tr>
                       <th>Código</th><th>Tipo</th><th>Posición</th><th>Vehículo</th>
-                      <th>Marca / Modelo</th><th>Cantidad</th><th>Espacio</th><th></th>
+                      <th>Marca / Modelo</th><th>Cantidad</th><th>Precio</th><th>Espacio</th><th></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -176,6 +176,7 @@ function App() {
                         <td>{v.tipo_vehiculo}</td>
                         <td>{v.marca} {v.modelo}</td>
                         <td className={v.cantidad === 0 ? 'cantidad-cero' : ''}>{v.cantidad}</td>
+                        <td>{v.precio != null ? `$${Number(v.precio).toFixed(2)}` : '—'}</td>
                         <td>{v.espacios?.codigo_espacio || '—'}</td>
                         <td className="col-acciones">
                           <button className="btn-icono" onClick={() => setVidrioEditando(v)}>Editar</button>
@@ -184,7 +185,7 @@ function App() {
                       </tr>
                     ))}
                     {vidriosFiltrados.length === 0 && (
-                      <tr><td colSpan="8" className="sin-resultados">No hay vidrios que coincidan con la búsqueda.</td></tr>
+                      <tr><td colSpan="9" className="sin-resultados">No hay vidrios que coincidan con la búsqueda.</td></tr>
                     )}
                   </tbody>
                 </table>

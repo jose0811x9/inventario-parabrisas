@@ -75,6 +75,9 @@ export default function AgregarVidrio({ espacios, onGuardado }) {
 
     setGuardando(true)
     setMensaje(null)
+    
+    const marcaLimpia = form.marca.trim().toUpperCase()
+    const modeloLimpio = form.modelo.trim().toUpperCase()
 
     const ladoFinal = necesitaLado ? form.lado : 'no_aplica'
 
@@ -87,8 +90,8 @@ export default function AgregarVidrio({ espacios, onGuardado }) {
       .eq('lado', ladoFinal)
       .eq('tipo_vehiculo', form.tipo_vehiculo)
       .eq('espacio_id', Number(form.espacio_id))
-      .ilike('marca', form.marca.trim())
-      .ilike('modelo', form.modelo.trim())
+      .eq('marca', marcaLimpia)
+      .eq('modelo', modeloLimpio)
       .limit(1)
 
     if (errorBusqueda) {
@@ -130,8 +133,8 @@ export default function AgregarVidrio({ espacios, onGuardado }) {
         posicion: form.posicion,
         lado: ladoFinal,
         tipo_vehiculo: form.tipo_vehiculo,
-        marca: form.marca,
-        modelo: form.modelo,
+        marca: marcaLimpia,
+        modelo: modeloLimpio,
         cantidad: Number(form.cantidad),
         precio: form.precio ? Number(form.precio) : null,
         proveedor: form.proveedor || null,

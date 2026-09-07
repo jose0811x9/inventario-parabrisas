@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
+import EditarEspacio from './EditarEspacio'
 
-export default function Espacios({ espacios, vidrios, onGuardado }) {
+export default function Espacios({ espacios, vidrios, onGuardado, esAdmin }) {
   const [form, setForm] = useState({ codigo_espacio: '', tipo_permitido: 'parabrisas', capacidad_maxima: 10 })
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState(null)
+  const [espacioEditando, setEspacioEditando] = useState(null)
 
   function ocupacion(espacioId) {
     return vidrios
@@ -122,10 +124,13 @@ export default function Espacios({ espacios, vidrios, onGuardado }) {
                   <td><span className={`tipo-badge tipo-${esp.tipo_permitido}`}>{esp.tipo_permitido}</span></td>
                   <td className={lleno ? 'cantidad-cero' : ''}>{usado}</td>
                   <td>{esp.capacidad_maxima}</td>
-                  <td>
-                    <button className="btn-icono btn-eliminar" onClick={() => eliminarEspacio(esp)}>
-                      Eliminar
-                    </button>
+                  <td className="col-acciones">
+                    <button className="btn-icono" onClick={() => setEspacioEditando(esp)}>Editar</button>
+                    {esAdmin && (
+                      <button className="btn-icono btn-eliminar" onClick={() => eliminarEspacio(esp)}>
+                        Eliminar
+                      </button>
+                    )}
                   </td>
                 </tr>
               )
@@ -135,6 +140,13 @@ export default function Espacios({ espacios, vidrios, onGuardado }) {
             )}
           </tbody>
         </table>
+        {espacioEditando && (
+          <EditarEspacio
+            espacio={espacioEditando}
+            onCerrar={() => setEspacioEditando(null)}
+            onGuardado={onGuardado}
+          />
+        )}
       </div>
     </div>
   )

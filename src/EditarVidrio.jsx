@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
+import { registrarMovimiento } from './movimientos'
 
 export default function EditarVidrio({ vidrio, espacios, onCerrar, onGuardado }) {
   const [form, setForm] = useState({
@@ -29,10 +30,19 @@ export default function EditarVidrio({ vidrio, espacios, onCerrar, onGuardado })
       })
       .eq('id', vidrio.id)
 
-    if (error) {
+        if (error) {
       setMensaje({ tipo: 'error', texto: 'No se pudo guardar: ' + error.message })
       setGuardando(false)
     } else {
+      const cambioCantidad = Number(form.cantidad) - vidrio.cantidad
+      if (cambioCantidad !== 0) {
+        await registrarMovimiento({
+          codigo_vidrio: vidrio.codigo_unico,
+          accion: 'editar',
+          detalle: `Cantidad: ${vidrio.cantidad} → ${form.cantidad}`,
+          cantidad_cambio: cambioCantidad,
+        })
+      }
       onGuardado()
       onCerrar()
     }

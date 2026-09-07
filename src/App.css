@@ -639,3 +639,42 @@ tbody tr:hover {
   gap: 10px;
 }
 
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.alerta-badge {
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.cantidad-baja {
+  color: var(--amber);
+  font-weight: 600;
+}
+.panel-head-acciones {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.accion-crear { background: rgba(126, 198, 153, 0.15); color: var(--success); }
+.accion-sumar { background: rgba(87, 200, 219, 0.15); color: var(--glass-blue); }
+.accion-editar { background: rgba(242, 165, 65, 0.15); color: var(--amber); }
+.accion-eliminar { background: rgba(229, 98, 107, 0.15); color: var(--danger); }
+
+.cantidad-positiva {
+  color: var(--success);
+  font-weight: 600;
+}

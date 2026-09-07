@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
+import { registrarMovimiento } from './movimientos'
 
 const PREFIJOS_TIPO = { parabrisas: 'PB', ventana: 'VE', ventolera: 'VO', lateral: 'LA' }
 const PREFIJOS_POSICION = { delantero: 'DEL', posterior: 'POS', ambos: 'AMB', no_aplica: 'XX' }
@@ -75,7 +76,7 @@ export default function AgregarVidrio({ espacios, onGuardado }) {
 
     setGuardando(true)
     setMensaje(null)
-    
+
     const marcaLimpia = form.marca.trim().toUpperCase()
     const modeloLimpio = form.modelo.trim().toUpperCase()
 
@@ -116,6 +117,12 @@ export default function AgregarVidrio({ espacios, onGuardado }) {
       if (error) {
         setMensaje({ tipo: 'error', texto: 'No se pudo actualizar: ' + error.message })
       } else {
+        await registrarMovimiento({
+          codigo_vidrio: actual.codigo_unico,
+          accion: 'sumar',
+          detalle: `Se sumaron ${form.cantidad} unidades en ${actual.codigo_unico}`,
+          cantidad_cambio: Number(form.cantidad),
+        })
         setMensaje({
           tipo: 'exito',
           texto: `Ya existía este vidrio en ese espacio (${actual.codigo_unico}). Se sumaron ${form.cantidad} unidades, ahora hay ${actual.cantidad + Number(form.cantidad)}.`,
@@ -144,6 +151,12 @@ export default function AgregarVidrio({ espacios, onGuardado }) {
       if (error) {
         setMensaje({ tipo: 'error', texto: 'No se pudo guardar. ' + error.message })
       } else {
+        await registrarMovimiento({
+          codigo_vidrio: codigo_unico,
+          accion: 'crear',
+          detalle: `Vidrio nuevo creado con ${form.cantidad} unidades`,
+          cantidad_cambio: Number(form.cantidad),
+        })
         setMensaje({ tipo: 'exito', texto: `Vidrio guardado con código ${codigo_unico}` })
         setForm((prev) => ({ ...prev, marca: '', modelo: '', cantidad: 1, precio: '', proveedor: '' }))
         onGuardado()
